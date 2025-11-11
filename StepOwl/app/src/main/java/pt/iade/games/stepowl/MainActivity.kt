@@ -1,6 +1,8 @@
 package pt.iade.games.stepowl
 
 import android.Manifest
+import android.R.attr.onClick
+import android.R.attr.padding
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Sensor
@@ -16,16 +18,31 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import pt.iade.games.stepowl.ui.theme.StepOwlTheme
@@ -41,7 +58,7 @@ class MainActivity : ComponentActivity() , SensorEventListener {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val steps = remember { mutableStateOf(0f) }
+            val steps = remember { mutableFloatStateOf(0f) }
 
             val sensorsPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission(),
@@ -62,6 +79,10 @@ class MainActivity : ComponentActivity() , SensorEventListener {
                 sensorsPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
             }
 
+
+            StepOwlTheme {
+                MainView(steps.value)
+            }
         }
     }
 
@@ -112,18 +133,79 @@ class MainActivity : ComponentActivity() , SensorEventListener {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun MainView(
+    steps: Float
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+
+                    ) {
+                        Text("StepOwl")
+                        Text("${steps.toInt()} steps")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxWidth()
+        ) {
+
+            Column(
+                modifier = Modifier
+                    .padding(15.dp)
+                    
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .fillMaxWidth()
+                        .background(Color(0xfff04f78))
+
+                ){
+                    Column {
+                        Button(
+                            onClick = {}
+                        ) {
+                            Text("Quest 1")
+                        }
+                        Button(
+                            onClick = {}
+                        ) {
+                            Text("Quest 2")
+                        }
+                        Button(
+                            onClick = {}
+                        ) {
+                            Text("Quest 3")
+                        }
+                    }
+
+                }
+
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainViewPreview() {
     StepOwlTheme {
-        Greeting("Android")
+        MainView(1234f)
     }
 }
