@@ -168,7 +168,7 @@ fun MainView(
             Column(
                 modifier = Modifier
                     .padding(15.dp)
-                    
+
             ) {
                 Box(
                     modifier = Modifier
@@ -197,6 +197,19 @@ fun MainView(
 
                 }
 
+                Box(
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .fillMaxWidth()
+                        .background(Color(0xf6804f78))
+                ){
+                    Button(
+                        onClick = {}
+                    ) {
+                        Text("Crafting and Inventory Section")
+                    }
+                }
+
             }
         }
     }
@@ -206,6 +219,6 @@ fun MainView(
 @Composable
 fun MainViewPreview() {
     StepOwlTheme {
-        MainView(1234f)
+        MainView(48f)
     }
 }
