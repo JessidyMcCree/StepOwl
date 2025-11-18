@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -45,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import pt.iade.games.stepowl.Components.QuestItem
 import pt.iade.games.stepowl.ui.theme.StepOwlTheme
 
 
@@ -170,31 +172,12 @@ fun MainView(
                     .padding(15.dp)
 
             ) {
-                Box(
-                    modifier = Modifier
-                        .padding(15.dp)
-                        .fillMaxWidth()
-                        .background(Color(0xfff04f78))
-
-                ){
-                    Column {
-                        Button(
-                            onClick = {}
-                        ) {
-                            Text("Quest 1")
-                        }
-                        Button(
-                            onClick = {}
-                        ) {
-                            Text("Quest 2")
-                        }
-                        Button(
-                            onClick = {}
-                        ) {
-                            Text("Quest 3")
-                        }
-                    }
-
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    QuestItem(
+                        title = "A fun title"
+                    )
                 }
 
                 Box(
