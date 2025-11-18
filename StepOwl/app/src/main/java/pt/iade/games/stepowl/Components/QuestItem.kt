@@ -1,5 +1,6 @@
 package pt.iade.games.stepowl.Components
 
+import android.media.Image
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +25,9 @@ import pt.iade.games.stepowl.ui.theme.StepOwlTheme
 
 @Composable
 fun QuestItem(
-    title: String
+    title: String,
+    description: String,
+    icon: Image
 ) {
     Card (
         modifier = Modifier.fillMaxWidth()
@@ -37,7 +40,7 @@ fun QuestItem(
                 modifier = Modifier.padding(10.dp)
             ) {
                 Text(title)
-                Text("Take 30 steps for a unicorn")
+                Text(description)
             }
 
             Image(
@@ -50,7 +53,7 @@ fun QuestItem(
             Button(
                 onClick = {}
             ) {
-                Text("Activate")
+                Text("Go!")
             }
         }
     }
@@ -61,7 +64,9 @@ fun QuestItem(
 fun QuestItemPreview() {
     StepOwlTheme {
         QuestItem(
-            title = "A title thing"
+            title = "A Doable Thing",
+            description = "Get the Gold dust! Walk 30 steps!",
+            icon = 
         )
     }
 }
