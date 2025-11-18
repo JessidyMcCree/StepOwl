@@ -42,9 +42,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -146,6 +149,8 @@ class MainActivity : ComponentActivity() , SensorEventListener {
 fun MainView(
     steps: Float
 ) {
+    var stepsCounter by remember { mutableIntStateOf(0) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -182,7 +187,22 @@ fun MainView(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     QuestItem(
-                        title = "A fun title"
+                        title = "A fun title",
+                        description = "Get the gold!",
+                        goal = 10,
+                        currentValue = stepsCounter
+                    )
+                    QuestItem(
+                        title = "A fun title",
+                        description = "Get the Books!",
+                        goal = 10,
+                        currentValue = 8
+                    )
+                    QuestItem(
+                        title = "A fun title",
+                        description = "Get the pearls!",
+                        goal = 10,
+                        currentValue = 8
                     )
                 }
 
@@ -193,7 +213,9 @@ fun MainView(
                         .background(Color(0xf6804f78))
                 ){
                     Button(
-                        onClick = {}
+                        onClick = {
+                            stepsCounter++
+                        }
                     ) {
                         Text("Crafting and Inventory Section")
                     }

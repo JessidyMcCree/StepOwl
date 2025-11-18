@@ -27,7 +27,8 @@ import pt.iade.games.stepowl.ui.theme.StepOwlTheme
 fun QuestItem(
     title: String,
     description: String,
-    icon: Image
+    goal: Int,
+    currentValue: Int
 ) {
     Card (
         modifier = Modifier.fillMaxWidth()
@@ -53,7 +54,8 @@ fun QuestItem(
             Button(
                 onClick = {}
             ) {
-                Text("Go!")
+                //Text("Go!")
+                Text("$currentValue/$goal")
             }
         }
     }
@@ -66,7 +68,8 @@ fun QuestItemPreview() {
         QuestItem(
             title = "A Doable Thing",
             description = "Get the Gold dust! Walk 30 steps!",
-            icon = 
+            goal = 10,
+            currentValue = 8
         )
     }
 }
