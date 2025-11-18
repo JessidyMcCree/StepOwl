@@ -12,6 +12,7 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.Surface
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,17 +21,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
@@ -190,6 +196,100 @@ fun MainView(
                         onClick = {}
                     ) {
                         Text("Crafting and Inventory Section")
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Surface(
+                                color = Color.Red,
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                            ) {
+                                Text(
+                                    text = "Inv 1",
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+
+                            Surface(
+                                color = Color.Blue,
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                            ) {
+                                Text(
+                                    text = "Inv 2",
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+
+                            Surface(
+                                color = Color.Green,
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                            ) {
+                                Text(
+                                    text = "Inv 3",
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Surface(
+                                color = Color.Red,
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                            ) {
+                                Text(
+                                    text = "Inv 1",
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+
+                            Surface(
+                                color = Color.Blue,
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                            ) {
+                                Text(
+                                    text = "Inv 2",
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+
+                            Surface(
+                                color = Color.Green,
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                            ) {
+                                Text(
+                                    text = "Inv 3",
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
                     }
                 }
 
