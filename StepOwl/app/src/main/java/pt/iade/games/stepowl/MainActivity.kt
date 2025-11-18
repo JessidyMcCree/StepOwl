@@ -148,8 +148,15 @@ class MainActivity : ComponentActivity() , SensorEventListener {
 @Composable
 fun MainView(
     steps: Float
+
 ) {
     var stepsCounter by remember { mutableIntStateOf(0) }
+    var quest1GoActive by remember {mutableStateOf(false)}
+    var quest2GoActive by remember {mutableStateOf(false)}
+    var quest3GoActive by remember {mutableStateOf(false)}
+    var quest1completed by remember {mutableStateOf(false)}
+    var quest2completed by remember {mutableStateOf(false)}
+    var quest3completed by remember {mutableStateOf(false)}
 
     Scaffold(
         topBar = {
@@ -187,22 +194,28 @@ fun MainView(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     QuestItem(
-                        title = "A fun title",
-                        description = "Get the gold!",
+                        title = "Argghhh where me gold?!",
+                        description = "Take 10 steps!",
                         goal = 10,
-                        currentValue = stepsCounter
+                        currentValue = stepsCounter,
+                        questActive = quest1GoActive,
+                        onGoClick = { quest1GoActive = true }
                     )
                     QuestItem(
-                        title = "A fun title",
-                        description = "Get the Books!",
-                        goal = 10,
-                        currentValue = 8
+                        title = "The Books fly!",
+                        description = "Take 20 steps!",
+                        goal = 20,
+                        currentValue = stepsCounter,
+                        questActive = quest2GoActive,
+                        onGoClick = { quest2GoActive = true }
                     )
                     QuestItem(
-                        title = "A fun title",
-                        description = "Get the pearls!",
-                        goal = 10,
-                        currentValue = 8
+                        title = "Help the Mermaid!",
+                        description = "Take 30 steps!",
+                        goal = 30,
+                        currentValue = stepsCounter,
+                        questActive = quest3GoActive,
+                        onGoClick = { quest3GoActive = true }
                     )
                 }
 
@@ -210,14 +223,14 @@ fun MainView(
                     modifier = Modifier
                         .padding(15.dp)
                         .fillMaxWidth()
-                        .background(Color(0xf6804f78))
+
                 ){
                     Button(
                         onClick = {
                             stepsCounter++
                         }
                     ) {
-                        Text("Crafting and Inventory Section")
+                        Text("Add some steps!")
                     }
                 }
 
@@ -258,50 +271,7 @@ fun MainView(
 
 
                             Surface(
-                                color = Color.Green,
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(100.dp)
-                            ) {
-                                Text(
-                                    text = "Inv 3",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Surface(
-                                color = Color.Red,
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(100.dp)
-                            ) {
-                                Text(
-                                    text = "Inv 1",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-
-                            Surface(
-                                color = Color.Blue,
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(100.dp)
-                            ) {
-                                Text(
-                                    text = "Inv 2",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-
-                            Surface(
-                                color = Color.Green,
+                                color = Color.Yellow,
                                 modifier = Modifier
                                     .width(100.dp)
                                     .height(100.dp)
@@ -314,7 +284,6 @@ fun MainView(
                         }
                     }
                 }
-
             }
         }
     }
