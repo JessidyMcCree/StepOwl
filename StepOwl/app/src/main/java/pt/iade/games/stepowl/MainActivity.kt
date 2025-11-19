@@ -1,5 +1,6 @@
 package pt.iade.games.stepowl
 
+import addItem
 import android.Manifest
 import android.R.attr.onClick
 import android.R.attr.padding
@@ -12,6 +13,7 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.util.Log.i
 import android.view.Surface
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -25,6 +27,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,10 +44,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,41 +60,45 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import getItem
 import pt.iade.games.stepowl.Components.QuestItem
 import pt.iade.games.stepowl.ui.theme.StepOwlTheme
 
 
-class MainActivity : ComponentActivity() , SensorEventListener {
+class MainActivity : ComponentActivity(), SensorEventListener {
 
-    // variable gives the running status
-    private var running = false
     private var initialSteps = -1
+    private lateinit var sensorManager: SensorManager
+    private var stepSensor: Sensor? = null
+
+    private val stepsState = mutableStateOf(0f)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
         setContent {
-            val steps = remember { mutableFloatStateOf(0f) }
+            val steps = stepsState
 
             val sensorsPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission(),
                 onResult = { isGranted ->
                     if (isGranted) {
-                        // granted
-                        Log.i("PERM", "OK")
-                        var sensorManager: SensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-                        val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-                        sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_UI)
+                        Log.i("PERM", "you have permission")
+                        startStepCounting()
                     } else {
-                        Log.e("PERM", "YOU DONT HAVE PERMISSION!!!!")
+                        Log.e("PERM", "YOU DONT HAVE PERMISSION")
                     }
                 }
             )
 
+
             SideEffect {
                 sensorsPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
             }
-
 
             StepOwlTheme {
                 MainView(steps.value)
@@ -97,66 +106,64 @@ class MainActivity : ComponentActivity() , SensorEventListener {
         }
     }
 
-    override fun onResume() {
-
-        super.onResume()
-        /*
-        running = true
-
-        // TYPE_STEP_COUNTER:  A constant describing a step counter sensor
-        // Returns the number of steps taken by the user since the last reboot while activated
-        // This sensor requires permission android.permission.ACTIVITY_RECOGNITION.
-        val stepSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-
+    private fun startStepCounting() {
         if (stepSensor == null) {
-            // show toast message, if there is no sensor in the device
-            Toast.makeText(this, "No sensor detected on this device", Toast.LENGTH_SHORT).show()
-        } else {
-            // register listener with sensorManager
-            sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_UI)
+            Log.e("SENSOR", "sensor has not found")
+            return
         }
-        */
+        sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_UI)
     }
 
     override fun onPause() {
         super.onPause()
-        /*
-        running = false
-        // unregister listener
-        sensorManager?.unregisterListener(this)
-         */
+        sensorManager.unregisterListener(this)
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        //if (running) {
-        if (true) {
-            //get the number of steps taken by the user.
-            val totalSteps = event!!.values[0]
+        if (event != null && event.sensor.type == Sensor.TYPE_STEP_COUNTER) {
+            val totalSteps = event.values[0]
             if (initialSteps < 0)
                 initialSteps = totalSteps.toInt()
+
             val currentSteps = totalSteps.toInt() - initialSteps
+            stepsState.value = currentSteps.toFloat()
             Log.i("STEPS", "Current steps: $currentSteps")
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        println("onAccuracyChanged: Sensor: $sensor; accuracy: $accuracy")
-    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView(
     steps: Float
-
 ) {
-    var stepsCounter by remember { mutableIntStateOf(0) }
-    var quest1GoActive by remember {mutableStateOf(false)}
-    var quest2GoActive by remember {mutableStateOf(false)}
-    var quest3GoActive by remember {mutableStateOf(false)}
-    var quest1completed by remember {mutableStateOf(false)}
-    var quest2completed by remember {mutableStateOf(false)}
-    var quest3completed by remember {mutableStateOf(false)}
+
+    // Quests
+    var quest1Active by remember { mutableStateOf(false) }
+    var quest2Active by remember { mutableStateOf(false) }
+    var quest3Active by remember { mutableStateOf(false) }
+
+    var quest1completed by remember { mutableStateOf(false) }
+    var quest2completed by remember { mutableStateOf(false) }
+    var quest3completed by remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(steps) {
+        if (quest1Active && !quest1completed && steps >= 10) {
+            quest1completed = true
+           addItem("Gold Coin")
+        }
+        if (quest2Active && !quest2completed && steps >= 20) {
+            quest2completed = true
+            addItem("Magic Book")
+        }
+        if (quest3Active && !quest3completed && steps >= 30) {
+            quest3completed = true
+            addItem("Mermaid Scale")
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -166,11 +173,7 @@ fun MainView(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Column(
-                        Modifier
-                            .fillMaxWidth()
-
-                    ) {
+                    Column(Modifier.fillMaxWidth()) {
                         Text("StepOwl")
                         Text("${steps.toInt()} steps")
                     }
@@ -185,102 +188,70 @@ fun MainView(
                 .fillMaxWidth()
         ) {
 
-            Column(
-                modifier = Modifier
-                    .padding(15.dp)
+            Column(modifier = Modifier.padding(15.dp)) {
+                // Quests
+                QuestItem(
+                    title = "Argghhh where me gold?!",
+                    description = "Take 10 steps!",
+                    goal = 10,
+                    currentValue = steps.toInt(),
+                    questActive = quest1Active,
+                    onGoClick = { quest1Active = true }
+                )
+                QuestItem(
+                    title = "The Books fly!",
+                    description = "Take 20 steps!",
+                    goal = 20,
+                    currentValue = steps.toInt(),
+                    questActive = quest2Active,
+                    onGoClick = { quest2Active = true }
+                )
+                QuestItem(
+                    title = "Help the Mermaid!",
+                    description = "Take 30 steps!",
+                    goal = 30,
+                    currentValue = steps.toInt(),
+                    questActive = quest3Active,
+                    onGoClick = { quest3Active = true }
+                )
+            }
 
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // inventory
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().padding(10.dp)
                 ) {
-                    QuestItem(
-                        title = "Argghhh where me gold?!",
-                        description = "Take 10 steps!",
-                        goal = 10,
-                        currentValue = stepsCounter,
-                        questActive = quest1GoActive,
-                        onGoClick = { quest1GoActive = true }
-                    )
-                    QuestItem(
-                        title = "The Books fly!",
-                        description = "Take 20 steps!",
-                        goal = 20,
-                        currentValue = stepsCounter,
-                        questActive = quest2GoActive,
-                        onGoClick = { quest2GoActive = true }
-                    )
-                    QuestItem(
-                        title = "Help the Mermaid!",
-                        description = "Take 30 steps!",
-                        goal = 30,
-                        currentValue = stepsCounter,
-                        questActive = quest3GoActive,
-                        onGoClick = { quest3GoActive = true }
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .padding(15.dp)
-                        .fillMaxWidth()
-
-                ){
-                    Button(
-                        onClick = {
-                            stepsCounter++
+                    // Slot 1
+                    Surface(
+                        color = Color.Red,
+                        modifier = Modifier.width(100.dp).height(100.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(getItem(0) ?: "Empty")
                         }
-                    ) {
-                        Text("Add some steps!")
                     }
-                }
 
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
+                    // Slot 2
+                    Surface(
+                        color = Color.Blue,
+                        modifier = Modifier.width(100.dp).height(100.dp)
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Surface(
-                                color = Color.Red,
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(100.dp)
-                            ) {
-                                Text(
-                                    text = "Inv 1",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(getItem(1) ?: "Empty")
+                        }
+                    }
 
-
-                            Surface(
-                                color = Color.Blue,
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(100.dp)
-                            ) {
-                                Text(
-                                    text = "Inv 2",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-
-                            Surface(
-                                color = Color.Yellow,
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(100.dp)
-                            ) {
-                                Text(
-                                    text = "Inv 3",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                    // Slot 3
+                    Surface(
+                        color = Color.Yellow,
+                        modifier = Modifier.width(100.dp).height(100.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            for (i in 0..2)
+                                Text(getItem(2) ?: "Empty")
                         }
                     }
                 }
@@ -288,7 +259,6 @@ fun MainView(
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun MainViewPreview() {
