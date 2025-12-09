@@ -50,6 +50,14 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.foundation.layout)
+    // https://mvnrepository.com/artifact/com.github.kittinunf.fuel/fuel
+    implementation("com.github.kittinunf.fuel:fuel:2.3.1")
+    // https://mvnrepository.com/artifact/com.github.kittinunf.fuel/fuel-android
+    runtimeOnly("com.github.kittinunf.fuel:fuel-android:2.3.1")
+    // https://mvnrepository.com/artifact/com.github.kittinunf.fuel/fuel-gson
+    runtimeOnly("com.github.kittinunf.fuel:fuel-gson:2.3.1")
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation("com.google.code.gson:gson:2.13.2")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

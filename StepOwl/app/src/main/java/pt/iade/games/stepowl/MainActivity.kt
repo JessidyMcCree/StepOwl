@@ -63,6 +63,11 @@ import androidx.core.content.ContextCompat
 import getItem
 import pt.iade.games.stepowl.Components.QuestItem
 import pt.iade.games.stepowl.ui.theme.StepOwlTheme
+// import to the server works
+import com.github.kittinunf.fuel.httpGet
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
+
 
 
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -94,7 +99,19 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     }
                 }
             )
+            "http://10.0.2.2:4000/hello".httpGet().response {
+                    request, response, result ->
+                // Get JSON string from server response.
+                val jsonString = String(result.get())
 
+                // Setup GSON and parse JSON.
+                // val gson = GsonBuilder().create()
+                //   val json = gson.fromJson(jsonString, JsonObject().javaClass)
+
+
+
+                Log.i("Hello", jsonString);
+            }
 
             SideEffect {
                 sensorsPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
@@ -139,6 +156,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 fun MainView(
     steps: Float
 ) {
+
+
+
 
     // Quests
     var quest1Active by remember { mutableStateOf(false) }
