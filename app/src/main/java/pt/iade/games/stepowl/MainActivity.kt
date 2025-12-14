@@ -96,6 +96,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
+    // Envio de inventário para Unity
     fun sendInventoryToServer(playerId: String, items: List<ItemPayload>) {
         if (items.isEmpty()) return
 
@@ -212,40 +213,24 @@ fun MainView(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // inventory
+            // Inventory
             Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth().padding(10.dp)
                 ) {
-                    // Slot 1
-                    Surface(
-                        color = Color.Red,
-                        modifier = Modifier.width(100.dp).height(100.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(getItem(0) ?: "Empty")
-                        }
-                    }
-
-                    // Slot 2
-                    Surface(
-                        color = Color.Blue,
-                        modifier = Modifier.width(100.dp).height(100.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(getItem(1) ?: "Empty")
-                        }
-                    }
-
-                    // Slot 3
-                    Surface(
-                        color = Color.Yellow,
-                        modifier = Modifier.width(100.dp).height(100.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            for (i in 0..2)
-                                Text(getItem(2) ?: "Empty")
+                    for (i in 0..2) {
+                        Surface(
+                            color = when (i) {
+                                0 -> Color.Red
+                                1 -> Color.Blue
+                                else -> Color.Yellow
+                            },
+                            modifier = Modifier.width(100.dp).height(100.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(getItem(i) ?: "Empty")
+                            }
                         }
                     }
                 }
@@ -266,15 +251,13 @@ fun MainView(
                     confirmButton = {
                         Button(onClick = {
                             if (unityIdInput.isNotBlank()) {
-                                // Exemplo de envio (podes substituir pelos itens reais)
-                                mainActivity.sendInventoryToServer(
-                                    unityIdInput,
-                                    listOf(
-                                        ItemPayload(1,1),
-                                        ItemPayload(2,1),
-                                        ItemPayload(3,1)
-                                    )
+                                // Envia os itens atuais do inventário
+                                val itemsPayload = listOf(
+                                    ItemPayload(1, getItem(0)?.let { 1 } ?: 0),
+                                    ItemPayload(2, getItem(1)?.let { 1 } ?: 0),
+                                    ItemPayload(3, getItem(2)?.let { 1 } ?: 0)
                                 )
+                                mainActivity.sendInventoryToServer(unityIdInput, itemsPayload)
                                 showIdDialog = false
                             }
                         }) {

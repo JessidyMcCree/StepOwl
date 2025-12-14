@@ -14,3 +14,13 @@ fun addItem(item: String) {
 fun getItem(index: Int): String? {
     return inventory[index]
 }
+
+// Mapeamento simples para IDs
+fun itemNameToId(name: String): Int {
+    return when (name) {
+        "HealPotion" -> 1
+        "AcidPotion" -> 2
+        "Octopus" -> 3
+        else -> 0
+    }
+}
