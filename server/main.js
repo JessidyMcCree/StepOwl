@@ -24,7 +24,12 @@ app.post("/inventory/add", (req, res) => {
         connection.query(
             `INSERT INTO inventory (playerId, itemId, quantity) VALUES (?, ?, ?)
              ON DUPLICATE KEY UPDATE quantity = quantity + ?`,
-            [playerId, item.itemId, item.quantity, item.quantity]
+            [playerId, item.itemId, item.quantity, item.quantity],
+            (err, result) => {
+                if (err) {
+                    console.error("Erro no INSERT:", err);
+                }
+            }
         );
     });
 
@@ -33,11 +38,17 @@ app.post("/inventory/add", (req, res) => {
 
 app.get("/inventory/:playerId", (req, res) => {
     const playerId = req.params.playerId;
+    console.log("GET /inventory para playerId:", playerId);
+
     connection.query(
         "SELECT itemId, quantity FROM inventory WHERE playerId = ?",
         [playerId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err });
+            if (err) {
+                console.error("Erro na query:", err);
+                return res.status(500).json({ error: err.message });
+            }
+            console.log("Resultados obtidos:", results);
             res.json(results);
         }
     );
