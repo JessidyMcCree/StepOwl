@@ -2,6 +2,7 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const session = require("express-session")
+const database = require("./database")
 
 //Initialize express
 const app = express()
@@ -13,32 +14,33 @@ app.use(bodyParser.urlencoded({extended: false}))
 
 app.use(express.json())
 
-/*
-//Connect to database
-connection.connect((err) => {
-    if (err) {
-        console.log("¯\_(ツ)_/¯ Error connecting to DB : " + err)
-        return
-    }
-    console.log("🦄 Connected to the DB")
-} )
 
-//Create session cookies
-app.use(session({
-    secret: "MySuperSecretKey", 
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        maxAge: 600000000
-    }
-}))
-*/
 
-app.get('/hello', (req, res) => {
-    res.send('Hello, World!');
+app.post("/inventory/add", (req, res) => {
+    const { playerId, items } = req.body;
+    if (!playerId || !items) return res.status(400).json({ error: "Missing playerId or items" });
+
+    items.forEach(item => {
+        connection.query(
+            `INSERT INTO inventory (playerId, itemId, quantity) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE quantity = quantity + ?`,
+            [playerId, item.itemId, item.quantity, item.quantity]
+        );
+    });
+
+    res.json({ success: true });
 });
 
-// listen for requests on port 
-app.listen(4000, () => {
-    console.log("🙌 Server is running on port 4000. Check http://localhost:4000/")
-})
+app.get("/inventory/:playerId", (req, res) => {
+    const playerId = req.params.playerId;
+    connection.query(
+        "SELECT itemId, quantity FROM inventory WHERE playerId = ?",
+        [playerId],
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err });
+            res.json(results);
+        }
+    );
+});
+
+app.listen(4000, () => console.log("🙌 Server running on port 4000"));
