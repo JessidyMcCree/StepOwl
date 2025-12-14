@@ -65,9 +65,12 @@ import pt.iade.games.stepowl.Components.QuestItem
 import pt.iade.games.stepowl.ui.theme.StepOwlTheme
 // import to the server works
 import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.httpPost
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
-
+import pt.iade.games.stepowl.Data.InventoryPayload
+import pt.iade.games.stepowl.Data.ItemPayload
 
 
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -99,7 +102,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     }
                 }
             )
-            "http://10.0.2.2:4000/hello".httpGet().response {
+            "https://stepowl.onrender.com/hello".httpGet().response {
                     request, response, result ->
                 // Get JSON string from server response.
                 val jsonString = String(result.get())
@@ -111,6 +114,26 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
 
                 Log.i("Hello", jsonString);
+            }
+
+            fun sendInventoryToServer(playerId: String, items: List<ItemPayload>) {
+                val payload = InventoryPayload(playerId, items)
+                val json = Gson().toJson(payload)
+
+                "https://stepowl.onrender.com/inventory/add"
+                    .httpPost()
+                    .body(json)
+                    .header("Content-Type" to "application/json")
+                    .response { request, response, result ->
+                        result.fold(
+                            success = { data ->
+                                Log.i("INVENTORY", "Server response: ${String(data)}")
+                            },
+                            failure = { error ->
+                                Log.e("INVENTORY", "Error: ${error.message}")
+                            }
+                        )
+                    }
             }
 
             SideEffect {
