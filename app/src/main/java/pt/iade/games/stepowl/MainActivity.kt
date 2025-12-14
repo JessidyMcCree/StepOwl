@@ -2,76 +2,32 @@ package pt.iade.games.stepowl
 
 import addItem
 import android.Manifest
-import android.R.attr.onClick
-import android.R.attr.padding
 import android.content.Context
-import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.util.Log.i
-import android.view.Surface
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import getItem
 import pt.iade.games.stepowl.Components.QuestItem
 import pt.iade.games.stepowl.ui.theme.StepOwlTheme
-// import to the server works
-import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
 import pt.iade.games.stepowl.Data.InventoryPayload
 import pt.iade.games.stepowl.Data.ItemPayload
-
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -102,46 +58,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     }
                 }
             )
-            "https://stepowl.onrender.com/hello".httpGet().response {
-                    request, response, result ->
-                // Get JSON string from server response.
-                val jsonString = String(result.get())
-
-                // Setup GSON and parse JSON.
-                // val gson = GsonBuilder().create()
-                //   val json = gson.fromJson(jsonString, JsonObject().javaClass)
-
-
-
-                Log.i("Hello", jsonString);
-            }
-
-            fun sendInventoryToServer(playerId: String, items: List<ItemPayload>) {
-                val payload = InventoryPayload(playerId, items)
-                val json = Gson().toJson(payload)
-
-                "https://stepowl.onrender.com/inventory/add"
-                    .httpPost()
-                    .body(json)
-                    .header("Content-Type" to "application/json")
-                    .response { request, response, result ->
-                        result.fold(
-                            success = { data ->
-                                Log.i("INVENTORY", "Server response: ${String(data)}")
-                            },
-                            failure = { error ->
-                                Log.e("INVENTORY", "Error: ${error.message}")
-                            }
-                        )
-                    }
-            }
 
             SideEffect {
                 sensorsPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
             }
 
             StepOwlTheme {
-                MainView(steps.value)
+                MainView(steps.value, this@MainActivity)
             }
         }
     }
@@ -172,16 +95,39 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    fun sendInventoryToServer(playerId: String, items: List<ItemPayload>) {
+        if (items.isEmpty()) return
+
+        val payload = InventoryPayload(playerId, items)
+        val json = Gson().toJson(payload)
+
+        "https://stepowl.onrender.com/inventory/add"
+            .httpPost()
+            .body(json)
+            .header("Content-Type" to "application/json")
+            .response { _, _, result ->
+                result.fold(
+                    success = { data ->
+                        Log.i("INVENTORY", "Server response: ${String(data)}")
+                    },
+                    failure = { error ->
+                        Log.e("INVENTORY", "Error: ${error.message}")
+                    }
+                )
+            }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView(
-    steps: Float
+    steps: Float,
+    mainActivity: MainActivity
 ) {
-
-
-
+    // Dialog e campo para Unity ID
+    var showIdDialog by remember { mutableStateOf(false) }
+    var unityIdInput by remember { mutableStateOf("") }
 
     // Quests
     var quest1Active by remember { mutableStateOf(false) }
@@ -192,11 +138,10 @@ fun MainView(
     var quest2completed by remember { mutableStateOf(false) }
     var quest3completed by remember { mutableStateOf(false) }
 
-
     LaunchedEffect(steps) {
         if (quest1Active && !quest1completed && steps >= 10) {
             quest1completed = true
-           addItem("Gold Coin")
+            addItem("Gold Coin")
         }
         if (quest2Active && !quest2completed && steps >= 20) {
             quest2completed = true
@@ -211,14 +156,20 @@ fun MainView(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = topAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 title = {
                     Column(Modifier.fillMaxWidth()) {
                         Text("StepOwl")
                         Text("${steps.toInt()} steps")
+                    }
+                },
+                actions = {
+                    // Botão Sync Unity
+                    Button(onClick = { showIdDialog = true }) {
+                        Text("Sync Unity")
                     }
                 }
             )
@@ -299,13 +250,52 @@ fun MainView(
                     }
                 }
             }
+
+            // ==================== DIALOG UNITY ID ====================
+            if (showIdDialog) {
+                AlertDialog(
+                    onDismissRequest = { showIdDialog = false },
+                    title = { Text("Digite seu Unity ID") },
+                    text = {
+                        OutlinedTextField(
+                            value = unityIdInput,
+                            onValueChange = { unityIdInput = it },
+                            label = { Text("Unity ID") }
+                        )
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            if (unityIdInput.isNotBlank()) {
+                                // Exemplo de envio (podes substituir pelos itens reais)
+                                mainActivity.sendInventoryToServer(
+                                    unityIdInput,
+                                    listOf(
+                                        ItemPayload(1,1),
+                                        ItemPayload(2,1),
+                                        ItemPayload(3,1)
+                                    )
+                                )
+                                showIdDialog = false
+                            }
+                        }) {
+                            Text("Enviar")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showIdDialog = false }) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
+            }
         }
     }
 }
-@Preview(showBackground = true)
+
+
 @Composable
 fun MainViewPreview() {
     StepOwlTheme {
-        MainView(48f)
+        MainView(48f, MainActivity())
     }
 }
