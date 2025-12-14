@@ -99,9 +99,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     // Envio de inventário para Unity
     fun sendInventoryToServer(playerId: String, items: List<ItemPayload>) {
         if (items.isEmpty()) return
-
-        val payload = InventoryPayload(playerId, items)
-        val json = Gson().toJson(payload)
+        val json = Gson().toJson(InventoryPayload(playerId, items))
 
         "https://stepowl.onrender.com/inventory/add"
             .httpPost()
@@ -109,16 +107,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             .header("Content-Type" to "application/json")
             .response { _, _, result ->
                 result.fold(
-                    success = { data ->
-                        Log.i("INVENTORY", "Server response: ${String(data)}")
-                    },
-                    failure = { error ->
-                        Log.e("INVENTORY", "Error: ${error.message}")
-                    }
+                    success = { data -> Log.i("INVENTORY", "Server response: ${String(data)}") },
+                    failure = { error -> Log.e("INVENTORY", "Error: ${error.message}") }
                 )
             }
     }
 }
+    
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
