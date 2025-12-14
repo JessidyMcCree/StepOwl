@@ -2,7 +2,7 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const session = require("express-session")
-const database = require("./database")
+const connection = require("./database")
 
 //Initialize express
 const app = express()
